@@ -1,0 +1,16 @@
+# Copyright (c) 2024 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+menuconfig DRV2605
+    bool "DRV2605 haptic motor driver"
+  select SPI
+    help
+      Enable DRV2605 haptic motor driver.
+
+if DRV2605
+
+module = DRV2605
+module-str = DRV2605
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+
+endif #DRV2605

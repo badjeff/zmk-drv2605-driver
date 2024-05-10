@@ -1,0 +1,15 @@
+# Copyright (c) 2024 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: |
+  Sensor driver for the DRV2605 Haptic Feedback Motor Driver
+
+compatible: "ti,drv2605"
+
+include: i2c-device.yaml
+
+properties:
+  library:
+    type: int
+    default: 0
+    description: "Library to use, 0 = Empty, 1-5 are ERM, 6 is LRA."
