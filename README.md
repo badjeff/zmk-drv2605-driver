@@ -2,7 +2,7 @@
 
 This module drives DRV2605 via i2c bus and exposes `sensor_driver_api`. 
 
-Example is available in [here](https://github.com/badjeff/zmk-output-behavior-listener/blob/main/src/output_haptic_feedback.c) from [zmk-output-behavior-listener](https://github.com/badjeff/zmk-output-behavior-listener).
+Example is available in [here](https://github.com/badjeff/zmk-output-behavior-listener/blob/54ba63badb1f5bf9697b2e14753396eb54b153c7/src/output_haptic_feedback.c#L51) from [zmk-output-behavior-listener](https://github.com/badjeff/zmk-output-behavior-listener).
 
 ## Installation
 
