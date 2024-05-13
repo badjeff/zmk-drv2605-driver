@@ -2,7 +2,7 @@
 
 This module exposes DRV2605 internal interrupt trigger instruction set via Zephyr's `sensor_driver_api`.
 
-Example is available at [here](https://github.com/badjeff/zmk-output-behavior-listener/blob/54ba63badb1f5bf9697b2e14753396eb54b153c7/src/output_haptic_feedback.c#L51) from [zmk-output-behavior-listener](https://github.com/badjeff/zmk-output-behavior-listener).
+Example is available at [here](https://github.com/badjeff/zmk-output-behavior-listener/blob/54ba63badb1f5bf9697b2e14753396eb54b153c7/src/output_haptic_feedback.c#L51) in [zmk-output-behavior-listener](https://github.com/badjeff/zmk-output-behavior-listener).
 
 ## Installation
 
