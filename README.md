@@ -66,7 +66,6 @@ Update `board.overlay` adding the necessary bits (update the pins for your board
 Enable the driver config in `<shield>.config` file (read the Kconfig file to find out all possible options):
 
 ```conf
-CONFIG_I2C=y
-CONFIG_DRV2605=y
-# CONFIG_DRV2605_LOG_LEVEL_DBG=y
+# Enable debug logging
+CONFIG_DRV2605_LOG_LEVEL_DBG=y
 ```
