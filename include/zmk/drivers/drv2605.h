@@ -67,6 +67,7 @@ extern "C" {
 #define DRV2605_SVALUE_TO_LIBRARY(svalue) ((uint32_t)(svalue).val1)
 #define DRV2605_SVALUE_TO_WAVEFORM_SLOT(svalue) ((uint32_t)(svalue).val1)
 #define DRV2605_SVALUE_TO_WAVEFORM_EFFECT(svalue) ((uint32_t)(svalue).val2)
+#define DRV2605_SVALUE_TO_MODE(svalue) ((uint32_t)(svalue).val1)
 
 /** @brief Sensor specific attributes of PMW3610. */
 enum drv2605_attribute {
@@ -82,6 +83,9 @@ enum drv2605_attribute {
 
 	/** Trigger GO to zero. */
 	DRV2605_ATTR_STOP,
+
+	/** Set Mode. */
+	DRV2605_ATTR_MODE,
 
 };
 

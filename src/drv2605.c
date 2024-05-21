@@ -9,6 +9,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/init.h>
+#include <zephyr/pm/device.h>
+#include <zephyr/pm/pm.h>
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/input/input.h>
 #include <zephyr/drivers/gpio.h>
@@ -47,6 +49,8 @@ enum drv2605_init_step {
 // - Since MCU is not involved in the sensor init process, i is allowed to do other tasks.
 //   Thus, k_sleep or delayed schedule can be used.
 static const int32_t async_init_delay[ASYNC_INIT_STEP_COUNT] = {
+    // The device will perform a quick startup sequence (250 μs) and go into STANDBY mode.
+    // Delay 1ms, make sure the device is startup is finished.
     [ASYNC_INIT_STEP_POWER_UP] = 1,
     [ASYNC_INIT_STEP_CONFIGURE] = 0,
 };
@@ -177,6 +181,26 @@ static int set_mode(const struct device *dev, uint8_t mode) {
     int err = i2c_reg_write_byte_dt(&config->i2c_bus, DRV2605_REG_MODE, mode);
     if (err) {
         LOG_ERR("Failed to set MODE");
+        return err;
+    }
+    return 0;
+}
+
+static int set_pm_resume(const struct device *dev) {
+    LOG_DBG("Setting resume");
+    int err = set_mode(dev, DRV2605_MODE_INTTRIG);
+    if (err) {
+        LOG_ERR("Failed to resume");
+        return err;
+    }
+    return 0;
+}
+
+static int set_pm_suspend(const struct device *dev) {
+    LOG_DBG("Setting suspend");
+    int err = set_mode(dev, DRV2605_MODE_DIAGNOS);
+    if (err) {
+        LOG_ERR("Failed to suspend");
         return err;
     }
     return 0;
@@ -355,6 +379,10 @@ static int drv2605_attr_set(const struct device *dev, enum sensor_channel chan,
         err = set_stop(dev);
         break;
 
+    case DRV2605_ATTR_MODE:
+        err = set_mode(dev, DRV2605_SVALUE_TO_MODE(*val));
+        break;
+
     default:
         LOG_ERR("Unknown attribute");
         err = -ENOTSUP;
@@ -367,13 +395,33 @@ static const struct sensor_driver_api drv2605_driver_api = {
     .attr_set = drv2605_attr_set,
 };
 
+#if IS_ENABLED(CONFIG_PM_DEVICE)
+static int drv2605_pm_action(const struct device *dev, enum pm_device_action action) {
+    switch (action) {
+    case PM_DEVICE_ACTION_SUSPEND:
+        return set_pm_suspend(dev);
+    case PM_DEVICE_ACTION_RESUME:
+        return set_pm_resume(dev);
+	case PM_DEVICE_ACTION_TURN_OFF:
+	case PM_DEVICE_ACTION_TURN_ON:
+		/* All device pm is handled during resume and suspend */
+		break;
+    default:
+        return -ENOTSUP;
+    }
+    return 0;
+}
+#endif //  IS_ENABLED(CONFIG_PM_DEVICE)
+
 #define DRV2605_DEFINE(n)                                                                          \
     static struct drv2605_data data##n;                                                            \
     static const struct drv2605_config config##n = {                                               \
         .library = DT_PROP(DT_DRV_INST(n), library),                                               \
         .i2c_bus = I2C_DT_SPEC_INST_GET(n),                                                        \
     };                                                                                             \
-    DEVICE_DT_INST_DEFINE(n, drv2605_init, NULL, &data##n, &config##n, POST_KERNEL,                \
+    PM_DEVICE_DT_INST_DEFINE(n, drv2605_pm_action);                                                \
+    DEVICE_DT_INST_DEFINE(n, drv2605_init, PM_DEVICE_DT_INST_GET(n),                               \
+                          &data##n, &config##n, POST_KERNEL,                                       \
                           CONFIG_SENSOR_INIT_PRIORITY, &drv2605_driver_api);
 
 DT_INST_FOREACH_STATUS_OKAY(DRV2605_DEFINE)
