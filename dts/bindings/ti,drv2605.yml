@@ -13,3 +13,6 @@ properties:
     type: int
     default: 0
     description: "Library to use, 0 = Empty, 1-5 are ERM, 6 is LRA."
+  standby-ms:
+    type: int
+    default: 1000

@@ -57,8 +57,12 @@ Update `board.overlay` adding the necessary bits (update the pins for your board
     drv2605_0: drv2605@5a {
         compatible = "ti,drv2605";
         reg = <0x5a>;
+
         /* Library to use, 0 = Empty, 1-5 are ERM, 6 is LRA. */
         library = <6>;
+
+        /* switch to standby mode after idling for 1000ms */
+        standby-ms = <1000>;
     };
 };
 ```
