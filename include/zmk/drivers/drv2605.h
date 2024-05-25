@@ -19,6 +19,8 @@ extern "C" {
 #define DRV2605_MODE_REALTIME 0x05    ///< Real-time playback (RTP) mode
 #define DRV2605_MODE_DIAGNOS 0x06     ///< Diagnostics mode
 #define DRV2605_MODE_AUTOCAL 0x07     ///< Auto calibration mode
+#define DRV2605_MODE_STANDBY BIT(6)   ///< Stand by mode
+#define DRV2605_MODE_DEV_RESET BIT(7) ///< Device reset mode
 
 #define DRV2605_REG_RTPIN 0x02    ///< Real-time playback input register
 #define DRV2605_REG_LIBRARY 0x03  ///< Waveform library selection register

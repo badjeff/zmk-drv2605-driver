@@ -81,9 +81,9 @@ static int set_standby(const struct device *dev, bool standby) {
     const struct drv2605_config *config = dev->config;
     int err = 0;
     if (!data->standby && standby) {
-        LOG_DBG("Setting MODE to 0x%x", DRV2605_MODE_DIAGNOS);
+        LOG_DBG("Setting MODE to 0x%x", DRV2605_MODE_STANDBY);
         err = i2c_reg_write_byte_dt(&config->i2c_bus,
-                                    DRV2605_REG_MODE, DRV2605_MODE_DIAGNOS);
+                                    DRV2605_REG_MODE, DRV2605_MODE_STANDBY);
         if (err) {
             LOG_ERR("Failed to get into standby mode");
             return err;
@@ -316,7 +316,7 @@ static int drv2605_async_init_configure(const struct device *dev) {
 
     if (!err) {
         // make it standby until set_go triggered
-        err = set_mode(dev, DRV2605_MODE_DIAGNOS);
+        err = set_mode(dev, DRV2605_MODE_STANDBY);
         data->standby = true;
     }
     
