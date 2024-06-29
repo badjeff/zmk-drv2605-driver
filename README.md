@@ -2,7 +2,7 @@
 
 This module exposes DRV2605 internal interrupt trigger instruction set via Zephyr's `sensor_driver_api`.
 
-This module was developed and tested on [adafruit-drv2605-haptic-controller-breakout](https://learn.adafruit.com/adafruit-drv2605-haptic-controller-breakout) with an [X-Axis LRA (Linear Resonant Actuator)](https://nfpshop.com/product/8mm-x-9mm-rectangular-linear-resonant-actuator-model-nfp-elv080935-using-for-wearable-device-haptic-feedback).
+This module was developed and tested on [adafruit-drv2605-haptic-controller-breakout](https://learn.adafruit.com/adafruit-drv2605-haptic-controller-breakout) with [this](https://www.aliexpress.com/item/1005006472395719.html) X-Axis LRA (Linear Resonant Actuator).
 
 Example is available at [here](https://github.com/badjeff/zmk-output-behavior-listener/blob/54ba63badb1f5bf9697b2e14753396eb54b153c7/src/output_haptic_feedback.c#L51) in [zmk-output-behavior-listener](https://github.com/badjeff/zmk-output-behavior-listener).
 
