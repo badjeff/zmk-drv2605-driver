@@ -72,7 +72,7 @@ extern "C" {
 #define DRV2605_SVALUE_TO_MODE(svalue) ((uint32_t)(svalue).val1)
 #define DRV2605_SVALUE_TO_BOOL(svalue) ((bool)(svalue).val1)
 
-/** @brief Sensor specific attributes of PMW3610. */
+/** @brief Sensor specific attributes of DRV2605. */
 enum drv2605_attribute {
 
 	/** Library Selection. */
