@@ -4,7 +4,7 @@
 description: |
   Sensor driver for the DRV2605 Haptic Feedback Motor Driver
 
-compatible: "ti,drv2605"
+compatible: "ti,drv2605-alt"
 
 include: i2c-device.yaml
 

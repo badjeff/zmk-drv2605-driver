@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#define DT_DRV_COMPAT ti_drv2605
+#define DT_DRV_COMPAT ti_drv2605_alt
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
@@ -14,13 +14,13 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/i2c.h>
 
-#include <zmk/drivers/drv2605.h>
+#include <zmk/drivers/drv2605_alt.h>
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(drv2605, CONFIG_DRV2605_LOG_LEVEL);
+LOG_MODULE_REGISTER(drv2605_alt, CONFIG_DRV2605_ALT_LOG_LEVEL);
 
 /* device data structure */
-struct drv2605_data {
+struct drv2605_alt_data {
     const struct device *dev;
     struct k_work_delayable init_work; // the work structure for delayable init steps
     int async_init_step;
@@ -31,7 +31,7 @@ struct drv2605_data {
 };
 
 /* device config data structure */
-struct drv2605_config {
+struct drv2605_alt_config {
     uint16_t library;
     struct i2c_dt_spec i2c_bus;
     bool has_standby_ms;
@@ -41,7 +41,7 @@ struct drv2605_config {
 //////// Sensor initialization steps definition //////////
 // init is done in non-blocking manner (i.e., async), a //
 // delayable work is defined for this purpose           //
-enum drv2605_init_step {
+enum drv2605_alt_init_step {
     ASYNC_INIT_STEP_POWER_UP,  // init and assert power-up reset
     ASYNC_INIT_STEP_CONFIGURE, // set other registes like library selection
     ASYNC_INIT_STEP_COUNT // end flag
@@ -57,16 +57,16 @@ static const int32_t async_init_delay[ASYNC_INIT_STEP_COUNT] = {
     [ASYNC_INIT_STEP_CONFIGURE] = 0,
 };
 
-static int drv2605_async_init_power_up(const struct device *dev);
-static int drv2605_async_init_configure(const struct device *dev);
+static int drv2605_alt_async_init_power_up(const struct device *dev);
+static int drv2605_alt_async_init_configure(const struct device *dev);
 
 static int (*const async_init_fn[ASYNC_INIT_STEP_COUNT])(const struct device *dev) = {
-    [ASYNC_INIT_STEP_POWER_UP] = drv2605_async_init_power_up,
-    [ASYNC_INIT_STEP_CONFIGURE] = drv2605_async_init_configure,
+    [ASYNC_INIT_STEP_POWER_UP] = drv2605_alt_async_init_power_up,
+    [ASYNC_INIT_STEP_CONFIGURE] = drv2605_alt_async_init_configure,
 };
 
 static int set_mode(const struct device *dev, uint8_t mode) {
-    const struct drv2605_config *config = dev->config;
+    const struct drv2605_alt_config *config = dev->config;
     LOG_DBG("Setting MODE to 0x%x", mode);
     int err = i2c_reg_write_byte_dt(&config->i2c_bus, DRV2605_REG_MODE, mode);
     if (err) {
@@ -77,8 +77,8 @@ static int set_mode(const struct device *dev, uint8_t mode) {
 }
 
 static int set_standby(const struct device *dev, bool standby) {
-    struct drv2605_data *data = dev->data;
-    const struct drv2605_config *config = dev->config;
+    struct drv2605_alt_data *data = dev->data;
+    const struct drv2605_alt_config *config = dev->config;
     int err = 0;
     if (!data->standby && standby) {
         LOG_DBG("Setting MODE to 0x%x", DRV2605_MODE_STANDBY);
@@ -104,7 +104,7 @@ static int set_standby(const struct device *dev, bool standby) {
 }
 
 static int set_stop(const struct device *dev) {
-    const struct drv2605_config *config = dev->config;
+    const struct drv2605_alt_config *config = dev->config;
     LOG_DBG("");
     int err = i2c_reg_write_byte_dt(&config->i2c_bus, DRV2605_REG_GO, 0);
     if (err) {
@@ -115,7 +115,7 @@ static int set_stop(const struct device *dev) {
 }
 
 static int set_go(const struct device *dev) {
-    const struct drv2605_config *config = dev->config;
+    const struct drv2605_alt_config *config = dev->config;
     LOG_DBG("");
     int err = 0;
 
@@ -135,7 +135,7 @@ static int set_go(const struct device *dev) {
 
     if (config->has_standby_ms) {
         // LOG_DBG("schedule standby work after %d ms", config->standby_ms);
-        struct drv2605_data *data = dev->data;
+        struct drv2605_alt_data *data = dev->data;
         k_work_schedule(&data->standby_work, K_MSEC(config->standby_ms));
     }
 
@@ -143,8 +143,7 @@ static int set_go(const struct device *dev) {
 }
 
 static int set_waveform(const struct device *dev, uint8_t slot, uint8_t w) {
-    const struct drv2605_config *config = dev->config;
-    LOG_DBG("");
+    const struct drv2605_alt_config *config = dev->config;
     int err = 0;
 
     LOG_DBG("Setting WAVESEQ1 [%d] to 0x%x", slot, w);
@@ -158,7 +157,7 @@ static int set_waveform(const struct device *dev, uint8_t slot, uint8_t w) {
 }
 
 static int set_library(const struct device *dev, uint8_t library) {
-    const struct drv2605_config *config = dev->config;
+    const struct drv2605_alt_config *config = dev->config;
     LOG_DBG("");
     int err = 0;
 
@@ -173,7 +172,7 @@ static int set_library(const struct device *dev, uint8_t library) {
 }
 
 static int set_use_lra(const struct device *dev, bool lra_mode) {
-    const struct drv2605_config *config = dev->config;
+    const struct drv2605_alt_config *config = dev->config;
     LOG_DBG("");
     int err = 0;
 
@@ -242,10 +241,10 @@ static int set_use_lra(const struct device *dev, bool lra_mode) {
     return 0;
 }
 
-static int drv2605_async_init_power_up(const struct device *dev) {
+static int drv2605_alt_async_init_power_up(const struct device *dev) {
     int err = 0;
-    // struct drv2605_data *data = dev->data;
-    const struct drv2605_config *config = dev->config;
+    // struct drv2605_alt_data *data = dev->data;
+    const struct drv2605_alt_config *config = dev->config;
     LOG_DBG("device initialised at 0x%x", config->i2c_bus.addr);
 
     uint8_t status;
@@ -301,9 +300,9 @@ static int drv2605_async_init_power_up(const struct device *dev) {
     return 0;
 }
 
-static int drv2605_async_init_configure(const struct device *dev) {
-    struct drv2605_data *data = dev->data;
-    const struct drv2605_config *config = dev->config;
+static int drv2605_alt_async_init_configure(const struct device *dev) {
+    struct drv2605_alt_data *data = dev->data;
+    const struct drv2605_alt_config *config = dev->config;
     int err = 0;
 
     if (!err) {
@@ -328,9 +327,9 @@ static int drv2605_async_init_configure(const struct device *dev) {
     return 0;
 }
 
-static void drv2605_async_init(struct k_work *work) {
+static void drv2605_alt_async_init(struct k_work *work) {
     struct k_work_delayable *work2 = (struct k_work_delayable *)work;
-    struct drv2605_data *data = CONTAINER_OF(work2, struct drv2605_data, init_work);
+    struct drv2605_alt_data *data = CONTAINER_OF(work2, struct drv2605_alt_data, init_work);
     const struct device *dev = data->dev;
 
     LOG_DBG("DRV2605 async init step %d", data->async_init_step);
@@ -360,18 +359,18 @@ static void drv2605_async_init(struct k_work *work) {
     }
 }
 
-static void drv2605_standby_cb(struct k_work *work) {
+static void drv2605_alt_standby_cb(struct k_work *work) {
     struct k_work_delayable *work_delayable = (struct k_work_delayable *)work;
-    struct drv2605_data *data = CONTAINER_OF(work_delayable,
-                                             struct drv2605_data,
+    struct drv2605_alt_data *data = CONTAINER_OF(work_delayable,
+                                             struct drv2605_alt_data,
                                              standby_work);
-    // const struct drv2605_config *cfg = data->dev->config; 
+    // const struct drv2605_alt_config *cfg = data->dev->config; 
     set_standby(data->dev, true);
 }
 
-static int drv2605_init(const struct device *dev) {
-    struct drv2605_data *data = dev->data;
-    const struct drv2605_config *config = dev->config;
+static int drv2605_alt_init(const struct device *dev) {
+    struct drv2605_alt_data *data = dev->data;
+    const struct drv2605_alt_config *config = dev->config;
     int err;
 
     // init device pointer
@@ -383,7 +382,7 @@ static int drv2605_init(const struct device *dev) {
     }
 
     if (config->has_standby_ms) {
-        k_work_init_delayable(&data->standby_work, drv2605_standby_cb);
+        k_work_init_delayable(&data->standby_work, drv2605_alt_standby_cb);
     }
 
     LOG_DBG("device initialised at 0x%x", config->i2c_bus.addr);
@@ -392,16 +391,16 @@ static int drv2605_init(const struct device *dev) {
     // 1. power reset
     // 2. upload initial settings
     // The sensor is ready to work (i.e., data->ready=true after the above steps are finished)
-    k_work_init_delayable(&data->init_work, drv2605_async_init);
+    k_work_init_delayable(&data->init_work, drv2605_alt_async_init);
 
     k_work_schedule(&data->init_work, K_MSEC(async_init_delay[data->async_init_step]));
 
     return err;
 }
 
-static int drv2605_attr_set(const struct device *dev, enum sensor_channel chan,
+static int drv2605_alt_attr_set(const struct device *dev, enum sensor_channel chan,
                             enum sensor_attribute attr, const struct sensor_value *val) {
-    struct drv2605_data *data = dev->data;
+    struct drv2605_alt_data *data = dev->data;
     int err;
 
     if (unlikely(chan != SENSOR_CHAN_ALL)) {
@@ -447,13 +446,13 @@ static int drv2605_attr_set(const struct device *dev, enum sensor_channel chan,
     return err;
 }
 
-static const struct sensor_driver_api drv2605_driver_api = {
-    .attr_set = drv2605_attr_set,
+static const struct sensor_driver_api drv2605_alt_driver_api = {
+    .attr_set = drv2605_alt_attr_set,
 };
 
 #define DRV2605_DEFINE(n)                                                           \
-    static struct drv2605_data data##n;                                             \
-    static const struct drv2605_config config##n = {                                \
+    static struct drv2605_alt_data data##n;                                             \
+    static const struct drv2605_alt_config config##n = {                                \
         .library = DT_PROP(DT_DRV_INST(n), library),                                \
         .i2c_bus = I2C_DT_SPEC_INST_GET(n),                                         \
         .has_standby_ms = DT_INST_NODE_HAS_PROP(n, standby_ms),                     \
@@ -461,8 +460,20 @@ static const struct sensor_driver_api drv2605_driver_api = {
             DT_INST_NODE_HAS_PROP(n, standby_ms),                                   \
             (DT_INST_PROP(n, standby_ms)), (0)),                                    \
     };                                                                              \
-    DEVICE_DT_INST_DEFINE(n, drv2605_init, NULL,                                    \
+    DEVICE_DT_INST_DEFINE(n, drv2605_alt_init, NULL,                                    \
                           &data##n, &config##n, POST_KERNEL,                        \
-                          CONFIG_SENSOR_INIT_PRIORITY, &drv2605_driver_api);
+                          CONFIG_SENSOR_INIT_PRIORITY, &drv2605_alt_driver_api);
 
 DT_INST_FOREACH_STATUS_OKAY(DRV2605_DEFINE)
+
+const struct device* drv2605_alt_get_dev_by_reg(uint16_t reg) {
+
+#define EXEC__DRV2605_ALT_GET_DEV_BY_REG(n) \
+    if (DT_INST_REG_ADDR(n) == reg) { \
+        return data##n.dev; \
+    }
+
+    DT_INST_FOREACH_STATUS_OKAY(EXEC__DRV2605_ALT_GET_DEV_BY_REG)
+
+    return (void *)0;
+}

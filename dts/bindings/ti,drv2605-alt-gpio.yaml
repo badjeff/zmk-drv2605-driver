@@ -1,0 +1,23 @@
+# Copyright (c) 2024 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: GPIO wrapper for DRV2605 Haptic Feedback Motor Driver
+
+compatible: "ti,drv2605-alt-gpio"
+
+include: [gpio-controller.yaml]
+
+properties:
+  dev-reg:
+    type: int
+    required: true
+    description: |
+      DRV2605 instance reg property value. Used to match this GPIO controller
+      with the corresponding DRV2605 device.
+
+  "#gpio-cells":
+    const: 2
+
+gpio-cells:
+  - pin
+  - flags

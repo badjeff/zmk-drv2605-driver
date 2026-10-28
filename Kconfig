@@ -3,18 +3,29 @@
 
 DT_COMPAT_DRV2605 := ti,drv2605
 
-config DRV2605
-  bool "DRV2605 haptic motor driver"
-  default $(dt_compat_enabled,$(DT_COMPAT_DRV2605))
+config DRV2605_ALT
+  bool "Alternative DRV2605 haptic motor driver"
+  # default $(dt_compat_enabled,$(DT_COMPAT_DRV2605_ALT))
+	default y
+	depends on DT_HAS_TI_DRV2605_ALT_ENABLED
   select I2C
   select SENSOR
   help
-      Enable DRV2605 haptic motor driver.
+      Enable Alternative DRV2605 haptic motor driver.
 
-if DRV2605
+if DRV2605_ALT
 
-module = DRV2605
-module-str = DRV2605
+config DRV2605_ALT_GPIO
+	bool "GPIO Wrapper of Alternative DRV2605"
+	default y
+	depends on DT_HAS_TI_DRV2605_ALT_GPIO_ENABLED
+	depends on DRV2605_ALT
+  select GPIO
+	help
+	  Enable the driver for Alternative DRV2605 GPIO.
+
+module = DRV2605_ALT
+module-str = DRV2605_ALT
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
 
-endif #DRV2605
+endif #DRV2605_ALT

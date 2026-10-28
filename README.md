@@ -4,7 +4,14 @@ This module exposes DRV2605 internal interrupt trigger instruction set via Zephy
 
 This module was developed and tested on [adafruit-drv2605-haptic-controller-breakout](https://learn.adafruit.com/adafruit-drv2605-haptic-controller-breakout) with [this](https://www.aliexpress.com/item/1005006472395719.html) X-Axis LRA (Linear Resonant Actuator).
 
-Example is available at [here](https://github.com/badjeff/zmk-output-behavior-listener/blob/54ba63badb1f5bf9697b2e14753396eb54b153c7/src/output_haptic_feedback.c#L51) in [zmk-output-behavior-listener](https://github.com/badjeff/zmk-output-behavior-listener).
+Example is available at [src/drv2605_alt_gpio.c](./src/drv2605_alt_gpio.c) and [here](https://github.com/badjeff/zmk-output-behavior-listener/blob/54ba63badb1f5bf9697b2e14753396eb54b153c7/src/output_haptic_feedback.c#L51) in [zmk-output-behavior-listener](https://github.com/badjeff/zmk-output-behavior-listener).
+
+> [!IMPORTANT]
+> 🚨 Breaking Change for `main`/`zmk-0.4` branch of this module:
+>
+> To avoid conflicts with the upstream Zephyr driver module, changes need to be made to the existing configuration in order to use this module in the current version of ZMK.
+> - Compatible string changed to `ti,drv2605-alt`
+> - All config prefix changed to `CONFIG_DRV2605_ALT_*`
 
 ## Installation
 
@@ -55,7 +62,7 @@ Update `board.overlay` adding the necessary bits (update the pins for your board
     pinctrl-names = "default", "sleep";
 
     drv2605_0: drv2605@5a {
-        compatible = "ti,drv2605";
+        compatible = "ti,drv2605-alt";
         reg = <0x5a>;
 
         /* Library to use, 0 = Empty, 1-5 are ERM, 6 is LRA. */
@@ -65,11 +72,23 @@ Update `board.overlay` adding the necessary bits (update the pins for your board
         standby-ms = <1000>;
     };
 };
+
+/{
+  /* Setup GPIO bridge. Would be access via <&gpio_drv2605_0 0 20> */
+	gpio_drv2605_0: gpio_drv2605_0 {
+		compatible = "ti,drv2605-alt-gpio";
+		status = "okay";
+		gpio-controller;
+		#gpio-cells = <2>;
+		dev-reg = <0x5a>;
+	};
+};
+
 ```
 
 Enable the driver config in `<shield>.config` file (read the Kconfig file to find out all possible options):
 
 ```conf
 # Enable debug logging
-CONFIG_DRV2605_LOG_LEVEL_DBG=y
+CONFIG_DRV2605_ALT_LOG_LEVEL_DBG=y
 ```

@@ -95,6 +95,8 @@ enum drv2605_attribute {
 
 };
 
+const struct device* drv2605_alt_get_dev_by_reg(uint16_t reg);
+
 #ifdef __cplusplus
 }
 #endif
