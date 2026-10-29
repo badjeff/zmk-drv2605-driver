@@ -81,7 +81,7 @@ static int set_standby(const struct device *dev, bool standby) {
     const struct drv2605_alt_config *config = dev->config;
     int err = 0;
     if (!data->standby && standby) {
-        LOG_DBG("Setting MODE to 0x%x", DRV2605_MODE_STANDBY);
+        LOG_DBG("Setting MODE to 0x%x", (unsigned int)DRV2605_MODE_STANDBY);
         err = i2c_reg_write_byte_dt(&config->i2c_bus,
                                     DRV2605_REG_MODE, DRV2605_MODE_STANDBY);
         if (err) {
